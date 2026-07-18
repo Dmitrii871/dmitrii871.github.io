@@ -1,0 +1,435 @@
+{
+  "flow": [
+    {
+      "id": 1,
+      "mapper": {
+        "url": "https://news.google.com/rss/search?q=Gazipa%C5%9Fa%20when%3A2d%20-havaliman%C4%B1%20-u%C3%A7ak%20-Astana%20-Almaty%20-Kazakistan&hl=tr&gl=TR&ceid=TR:tr",
+        "gzip": false,
+        "maxResults": 12,
+        "filterDateFrom": "{{addDays(now; -2)}}"
+      },
+      "module": "rss:ActionReadArticles",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": -1300,
+          "y": 0
+        }
+      },
+      "parameters": {}
+    },
+    {
+      "id": 2,
+      "mapper": {
+        "value": "{{1.title}}"
+      },
+      "module": "builtin:BasicAggregator",
+      "version": 1,
+      "metadata": {
+        "restore": {
+          "extra": {
+            "feeder": {
+              "label": "RSS"
+            }
+          }
+        },
+        "designer": {
+          "x": -1100,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "feeder": 1
+      }
+    },
+    {
+      "id": 3,
+      "mapper": {
+        "sort": [
+          {
+            "key": "key",
+            "order": "-1"
+          }
+        ],
+        "filter": [
+          [
+            {
+              "a": "guid",
+              "o": "notexist"
+            }
+          ]
+        ]
+      },
+      "module": "datastore:SearchRecord",
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": -950,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "limit": 25,
+        "datastore": 141144
+      }
+    },
+    {
+      "id": 4,
+      "mapper": {
+        "value": "{{3.data.title}}"
+      },
+      "module": "builtin:BasicAggregator",
+      "version": 1,
+      "metadata": {
+        "restore": {
+          "extra": {
+            "feeder": {
+              "label": "Data store - Search records"
+            }
+          }
+        },
+        "designer": {
+          "x": -800,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "feeder": 3
+      }
+    },
+    {
+      "id": 5,
+      "mapper": {
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "method": "post",
+        "headers": [
+          {
+            "name": "x-goog-api-key",
+            "value": "GEMINI_API_KEY_REDACTED"
+          }
+        ],
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "stopOnHttpError": true,
+        "jsonStringBodyContent": "{\"contents\":[{\"parts\":[{\"text\":\"Ты редактор новостного сообщества про город Газипаша и побережье (Алания, Анталья). Свежие заголовки турецких новостей: {{replace(join(map(2.array; \"value\"); \" / \"); \"/[\\x22\\r\\n]+/g\"; \" \")}}. УЖЕ ОПУБЛИКОВАННЫЕ ранее темы, повторять их ЗАПРЕЩЕНО: {{replace(join(map(4.array; \"value\"); \" || \"); \"/[\\x22\\r\\n]+/g\"; \" \")}} . Действуй строго по шагам. Шаг 1: по каждой свежей новости мысленно проверь, нет ли её среди уже опубликованных ПО СМЫСЛУ, то есть то же событие, место, происшествие или тема, даже если заголовок и слова совсем другие. Шаг 2: все совпадающие по смыслу отбрось. Шаг 3: из оставшихся, ещё НЕ публиковавшихся, выбери ОДНУ самую свежую и интересную местную новость. Если все громкие новости уже были, возьми менее громкую, но точно НОВУЮ тему: городское событие, море и пляжи, цены, туризм, происшествие, культуру, стройку, открытие, транспорт. Повторять уже опубликованное КАТЕГОРИЧЕСКИ НЕЛЬЗЯ, даже переписав другими словами. Не старее 2 дней. СТРОГО ЗАПРЕЩЕНО писать про авиарейсы, аэропорт, статистику аэропорта, а также про Алматы, Астану и Казахстан. Переведи выбранную новость на русский и напиши готовый живой пост для сообщества. Первая строка цепляющий заголовок с эмодзи. Длина по важности, обычно короткий или средний, не более 25 строк. НЕ используй тире и длинное тире (символы — и –), только запятые, точки и двоеточия. Формат ответа СТРОГО из двух частей через разделитель ||| : СНАЧАЛА текст поста, ЗАТЕМ ||| ЗАТЕМ короткий промпт на английском для фотореалистичной обложки по смыслу новости. ВАЖНОЕ ПРАВИЛО для обложки: НЕ описывай людей крупным планом, лица, руки и толпу. Вместо людей показывай МЕСТО и ОБСТАНОВКУ: здания, улицы, побережье, море, горы, природу, технику, машины, предметы, общий вид. Если люди нужны, только очень мелко вдалеке, со спины. Обложка красивая, чёткая и естественная. 12-20 слов, упор на обстановку и объекты, без людей на переднем плане. Без пояснений. Выведи только: текст поста ||| английский промпт обложки.\"}]}],\"generationConfig\":{\"temperature\":0.9,\"maxOutputTokens\":4096,\"thinkingConfig\":{\"thinkingBudget\":2048}}}",
+        "requestCompressedContent": true
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": -650,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 6,
+      "mapper": {
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent",
+        "method": "post",
+        "headers": [
+          {
+            "name": "x-goog-api-key",
+            "value": "GEMINI_API_KEY_REDACTED"
+          }
+        ],
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "stopOnHttpError": false,
+        "jsonStringBodyContent": "{\"contents\":[{\"parts\":[{\"text\":\"{{replace(trim(get(split(5.data.candidates[1].content.parts[1].text; \"|||\"); 2)); \"/[\\x22\\r\\n]+/g\"; \" \")}} . photorealistic cinematic wide establishing shot, scenery and architecture focus, natural daylight, high detail, no text, no people in foreground\"}]}],\"generationConfig\":{\"responseModalities\":[\"IMAGE\"]}}",
+        "requestCompressedContent": true
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": -500,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 7,
+      "filter": {
+        "name": "есть картинка",
+        "conditions": [
+          [
+            {
+              "a": "{{6.data.candidates[1].content.parts[1].inlineData.data}}",
+              "o": "exist"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "url": "https://api.vk.com/method/photos.getWallUploadServer",
+        "method": "get",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "queryParameters": [
+          {
+            "name": "group_id",
+            "value": "228774911"
+          },
+          {
+            "name": "access_token",
+            "value": "VK_ACCESS_TOKEN_REDACTED"
+          },
+          {
+            "name": "v",
+            "value": "5.199"
+          }
+        ],
+        "stopOnHttpError": false,
+        "requestCompressedContent": false
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": -350,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 8,
+      "mapper": {
+        "url": "{{7.data.response.upload_url}}",
+        "method": "post",
+        "contentType": "multipart",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "stopOnHttpError": false,
+        "multipartBodyContent": [
+          {
+            "data": "{{toBinary(6.data.candidates.1.content.parts.1.inlineData.data; \"base64\")}}",
+            "name": "photo",
+            "fileName": "news.png",
+            "multipartFieldType": "file"
+          }
+        ],
+        "requestCompressedContent": false
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": -200,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 9,
+      "mapper": {
+        "url": "https://api.vk.com/method/photos.saveWallPhoto",
+        "method": "get",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "queryParameters": [
+          {
+            "name": "group_id",
+            "value": "228774911"
+          },
+          {
+            "name": "photo",
+            "value": "{{8.data.photo}}"
+          },
+          {
+            "name": "server",
+            "value": "{{8.data.server}}"
+          },
+          {
+            "name": "hash",
+            "value": "{{8.data.hash}}"
+          },
+          {
+            "name": "access_token",
+            "value": "VK_ACCESS_TOKEN_REDACTED"
+          },
+          {
+            "name": "v",
+            "value": "5.199"
+          }
+        ],
+        "stopOnHttpError": false,
+        "requestCompressedContent": false
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": -50,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 10,
+      "filter": {
+        "name": "фото готово",
+        "conditions": [
+          [
+            {
+              "a": "{{9.data.response[1].id}}",
+              "o": "exist"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "url": "https://api.vk.com/method/wall.post",
+        "method": "get",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "queryParameters": [
+          {
+            "name": "owner_id",
+            "value": "-228774911"
+          },
+          {
+            "name": "from_group",
+            "value": "1"
+          },
+          {
+            "name": "message",
+            "value": "{{trim(replace(replace(replace(replace(replace(get(split(5.data.candidates[1].content.parts[1].text; \"|||\"); 1); \" — \"; \", \"); \" – \"; \", \"); \" - \"; \", \"); \"—\"; \"\"); \"–\"; \"\"))}}\n\n📲 Подпишись на сообщество: новости побережья каждый день!"
+          },
+          {
+            "name": "attachments",
+            "value": "photo{{9.data.response[1].owner_id}}_{{9.data.response[1].id}}"
+          },
+          {
+            "name": "access_token",
+            "value": "VK_ACCESS_TOKEN_REDACTED"
+          },
+          {
+            "name": "v",
+            "value": "5.199"
+          }
+        ],
+        "stopOnHttpError": false,
+        "requestCompressedContent": false
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": 100,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 11,
+      "filter": {
+        "name": "пост вышел",
+        "conditions": [
+          [
+            {
+              "a": "{{9.data.response[1].id}}",
+              "o": "exist"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "key": "{{formatDate(now; \"YYYYMMDDHHmmss\")}}",
+        "data": {
+          "title": "{{substring(replace(trim(get(split(5.data.candidates[1].content.parts[1].text; \"|||\"); 1)); \"/[\\x22\\r\\n]+/g\"; \" \"); 0; 90)}}"
+        },
+        "overwrite": false
+      },
+      "module": "datastore:AddRecord",
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "datastore": 141144
+      }
+    }
+  ],
+  "name": "Новости Турции (ГАЗИПАША)",
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "designer": {
+      "orphans": []
+    },
+    "scenario": {
+      "dlq": false,
+      "dataloss": false,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "roundtrips": 1,
+      "sequential": false,
+      "confidential": false,
+      "freshVariables": false
+    }
+  },
+  "scheduling": {
+    "type": "indefinitely",
+    "interval": 900,
+    "restrict": [
+      {
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          0
+        ],
+        "time": [
+          "08:00",
+          "08:01"
+        ]
+      }
+    ]
+  },
+  "interface": {
+    "input": [],
+    "output": []
+  }
+}

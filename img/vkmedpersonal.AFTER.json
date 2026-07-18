@@ -1,0 +1,378 @@
+{
+  "flow": [
+    {
+      "id": 1,
+      "mapper": {
+        "from": "drive",
+        "limit": "1",
+        "filter": [
+          [
+            {
+              "a": "B",
+              "o": "notexist"
+            },
+            {
+              "a": "E",
+              "o": "exist"
+            },
+            {
+              "a": "A",
+              "o": "exist"
+            }
+          ]
+        ],
+        "orderBy": "E",
+        "sheetId": "Лист1",
+        "sortOrder": "asc",
+        "spreadsheetId": "1uNX3k-gp0584AOVT28Xsg2m_FAOmWDnw69GcOMGvYsc",
+        "tableFirstRow": "A1:CZ1",
+        "includesHeaders": true,
+        "valueRenderOption": "FORMATTED_VALUE",
+        "dateTimeRenderOption": "FORMATTED_STRING"
+      },
+      "module": "google-sheets:filterRows",
+      "version": 2,
+      "metadata": {
+        "designer": {
+          "x": -1100,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "__IMTCONN__": 8598138
+      }
+    },
+    {
+      "id": 2,
+      "mapper": {
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "method": "post",
+        "headers": [
+          {
+            "name": "x-goog-api-key",
+            "value": "GEMINI_API_KEY_REDACTED"
+          }
+        ],
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "stopOnHttpError": false,
+        "jsonStringBodyContent": "{\"contents\":[{\"parts\":[{\"text\":\"Текст поста: {{replace(1.`0`; \"/[\\r\\n]+/g\"; \" \")}} . Внимательно проанализируй ВЕСЬ текст, все предложения целиком, и пойми, о чём пост на самом деле и какая главная сцена. Затем составь на английском ОДНО цельное продуманное описание фотореалистичной обложки, которое ТОЧНО и БУКВАЛЬНО отражает суть и главную сцену поста по всем предложениям: место, объект, действие, детали и атмосферу. Соответствие обязательно: про кафе, то интерьер кафе; про город, то улицы этого города; про зиму и море, то зимнее море и побережье; если автор пишет что работает, то человек за ноутбуком в работе; про конкретное блюдо или напиток, то оно крупным планом. Не общее настроение и не абстракция, а конкретная сцена именно из текста, красивая и качественная. Без текста и надписей на изображении. 15-25 слов. Выведи ТОЛЬКО английский промпт, без пояснений и без кавычек.\"}]}],\"generationConfig\":{\"temperature\":0.55,\"maxOutputTokens\":600,\"thinkingConfig\":{\"thinkingBudget\":0}}}",
+        "requestCompressedContent": true
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": -900,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 3,
+      "mapper": {
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent",
+        "method": "post",
+        "headers": [
+          {
+            "name": "x-goog-api-key",
+            "value": "GEMINI_API_KEY_REDACTED"
+          }
+        ],
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "stopOnHttpError": false,
+        "jsonStringBodyContent": "{\"contents\":[{\"parts\":[{\"text\":\"{{replace(ifempty(trim(1.`3`); ifempty(trim(2.data.candidates.1.content.parts.1.text); \"green wellness drink product still life\")); \"/[\\x22\\r\\n]+/g\"; \" \")}} . photorealistic professional advertising product photography, soft natural light, bright clean minimalist background, high detail, no text\"}]}],\"generationConfig\":{\"responseModalities\":[\"IMAGE\"]}}",
+        "requestCompressedContent": true
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": -700,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 4,
+      "mapper": {
+        "url": "https://api.vk.com/method/photos.getWallUploadServer",
+        "method": "get",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "queryParameters": [
+          {
+            "name": "group_id",
+            "value": "230223888"
+          },
+          {
+            "name": "access_token",
+            "value": "VK_ACCESS_TOKEN_REDACTED"
+          },
+          {
+            "name": "v",
+            "value": "5.199"
+          }
+        ],
+        "stopOnHttpError": false,
+        "requestCompressedContent": false
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": -500,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 5,
+      "mapper": {
+        "url": "{{4.data.response.upload_url}}",
+        "method": "post",
+        "contentType": "multipart",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "stopOnHttpError": false,
+        "multipartBodyContent": [
+          {
+            "data": "{{toBinary(3.data.candidates.1.content.parts.1.inlineData.data; \"base64\")}}",
+            "name": "photo",
+            "fileName": "post.png",
+            "multipartFieldType": "file"
+          }
+        ],
+        "requestCompressedContent": false
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": -300,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 6,
+      "mapper": {
+        "url": "https://api.vk.com/method/photos.saveWallPhoto",
+        "method": "get",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "queryParameters": [
+          {
+            "name": "group_id",
+            "value": "230223888"
+          },
+          {
+            "name": "photo",
+            "value": "{{5.data.photo}}"
+          },
+          {
+            "name": "server",
+            "value": "{{5.data.server}}"
+          },
+          {
+            "name": "hash",
+            "value": "{{5.data.hash}}"
+          },
+          {
+            "name": "access_token",
+            "value": "VK_ACCESS_TOKEN_REDACTED"
+          },
+          {
+            "name": "v",
+            "value": "5.199"
+          }
+        ],
+        "stopOnHttpError": false,
+        "requestCompressedContent": false
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": -100,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 7,
+      "filter": {
+        "name": "фото и текст готовы",
+        "conditions": [
+          [
+            {
+              "a": "{{6.data.response[1].id}}",
+              "o": "exist"
+            },
+            {
+              "a": "{{1.`0`}}",
+              "o": "exist"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "url": "https://api.vk.com/method/wall.post",
+        "method": "get",
+        "shareCookies": false,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "queryParameters": [
+          {
+            "name": "owner_id",
+            "value": "-230223888"
+          },
+          {
+            "name": "from_group",
+            "value": "1"
+          },
+          {
+            "name": "message",
+            "value": "{{1.`0`}}"
+          },
+          {
+            "name": "attachments",
+            "value": "photo{{6.data.response[1].owner_id}}_{{6.data.response[1].id}}"
+          },
+          {
+            "name": "access_token",
+            "value": "VK_ACCESS_TOKEN_REDACTED"
+          },
+          {
+            "name": "v",
+            "value": "5.199"
+          }
+        ],
+        "stopOnHttpError": false,
+        "requestCompressedContent": false
+      },
+      "module": "http:MakeRequest",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": 100,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "tlsType": "",
+        "authenticationType": "noAuth"
+      }
+    },
+    {
+      "id": 8,
+      "filter": {
+        "name": "фото опубликовано",
+        "conditions": [
+          [
+            {
+              "a": "{{6.data.response[1].id}}",
+              "o": "exist"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "mode": "fromAll",
+        "values": {
+          "1": "done"
+        },
+        "sheetId": "Лист1",
+        "rowNumber": "{{1.`__ROW_NUMBER__`}}",
+        "spreadsheetId": "1uNX3k-gp0584AOVT28Xsg2m_FAOmWDnw69GcOMGvYsc",
+        "includesHeaders": true,
+        "useColumnHeaders": false,
+        "valueInputOption": "USER_ENTERED"
+      },
+      "module": "google-sheets:updateRow",
+      "version": 2,
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "__IMTCONN__": 8598138
+      }
+    }
+  ],
+  "name": "VK Мёд (личный бренд)",
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "designer": {
+      "orphans": []
+    },
+    "scenario": {
+      "dlq": false,
+      "dataloss": false,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "roundtrips": 1,
+      "sequential": false,
+      "confidential": false,
+      "freshVariables": false
+    }
+  },
+  "scheduling": {
+    "type": "indefinitely",
+    "interval": 900,
+    "restrict": [
+      {
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          0
+        ],
+        "time": [
+          "18:30",
+          "18:31"
+        ]
+      }
+    ]
+  },
+  "interface": {
+    "input": [],
+    "output": []
+  }
+}
